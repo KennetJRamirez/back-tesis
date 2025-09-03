@@ -3,8 +3,9 @@ POST http://localhost:3000/auth/register
 Content-Type: application/json
 
 {
-  "nombre": "Joab Guzman",
-  "email": "joab@example.com",
+  "nombre": "Grace",
+  "telefono": "12345678",
+  "email": "grace@demo.com",
   "password": "123456789"
 }
 
@@ -13,17 +14,17 @@ POST http://localhost:3000/auth/login
 Content-Type: application/json
 
 {
-  "email": "joab@example.com",
+  "email": "grace@demo.com",
   "password": "123456789"
 }
 
 ### Obtener perfil
 GET http://localhost:3000/usuario/me
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Miwicm9sIjoxLCJpYXQiOjE3NTY4NTgyMjUsImV4cCI6MTc1Njg2MTgyNX0.l8meB-WDw9S91ngC_-5RDUFALj5Ul_4hEk3J5pGxTE4
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Mywicm9sIjoxLCJpYXQiOjE3NTY4NTk2OTMsImV4cCI6MTc1Njg2MzI5M30.l0zVfs69udEDLfijC4QXXk0QpmFvWpZphhzqaqoAGOQ
 
 ### Actualizar perfil
 PUT http://localhost:3000/usuario/me
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Miwicm9sIjoxLCJpYXQiOjE3NTY4NTgyMjUsImV4cCI6MTc1Njg2MTgyNX0.l8meB-WDw9S91ngC_-5RDUFALj5Ul_4hEk3J5pGxTE4
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Mywicm9sIjoxLCJpYXQiOjE3NTY4NTk2OTMsImV4cCI6MTc1Njg2MzI5M30.l0zVfs69udEDLfijC4QXXk0QpmFvWpZphhzqaqoAGOQ
 Content-Type: application/json
 
 {
@@ -40,4 +41,41 @@ Content-Type: application/json
 {
   "currentPassword": "123456789",
   "newPassword": "987654321"
+}
+
+
+### Parte Administrativa
+### Login
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{
+  "email": "joab@example.com",
+  "password": "987654321"
+}
+
+### Ver por ID
+GET http://localhost:3000/admin/usuarios/3
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Miwicm9sIjozLCJpYXQiOjE3NTY4NTk3MzksImV4cCI6MTc1Njg2MzMzOX0.x9eZK0y-9Q6EVVh4v5Kp_F31FwmKVMr3D41OgqXYyyc
+
+### Ver Todos los Usuarios
+GET http://localhost:3000/admin/usuarios
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Miwicm9sIjozLCJpYXQiOjE3NTY4NTk3MzksImV4cCI6MTc1Njg2MzMzOX0.x9eZK0y-9Q6EVVh4v5Kp_F31FwmKVMr3D41OgqXYyyc
+
+### Cambiar Rol de Usuario
+PUT http://localhost:3000/admin/usuarios/3/rol
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Miwicm9sIjozLCJpYXQiOjE3NTY4NTk3MzksImV4cCI6MTc1Njg2MzMzOX0.x9eZK0y-9Q6EVVh4v5Kp_F31FwmKVMr3D41OgqXYyyc
+Content-Type: application/json
+
+{
+  "id_rol": 2
+}
+
+### Cambiar Estado Activo/Inactivo
+PUT http://localhost:3000/admin/usuarios/3/estado
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Miwicm9sIjozLCJpYXQiOjE3NTY4NTk3MzksImV4cCI6MTc1Njg2MzMzOX0.x9eZK0y-9Q6EVVh4v5Kp_F31FwmKVMr3D41OgqXYyyc
+Content-Type: application/json
+
+{
+  "activo": false
 }

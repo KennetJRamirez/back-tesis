@@ -4,16 +4,16 @@ import { generateToken } from "../config/jwt.js";
 
 export const register = async (req, res) => {
 	try {
-		const { nombre, email, password, id_rol } = req.body;
+		const { nombre, telefono, email, password, id_rol } = req.body;
 		const rolAsignado = id_rol || 1;
 		const hashed = await hashPassword(password);
 
 		const [result] = await db.query(
-			"INSERT INTO usuario (nombre, email, password, id_rol) VALUES (?, ?, ?, ?)",
-			[nombre, email, hashed, rolAsignado]
+			"INSERT INTO usuario (nombre,telefono, email, password, id_rol) VALUES (?, ?, ?, ?, ?)",
+			[nombre, telefono, email, hashed, rolAsignado]
 		);
 
-		res.json({ id: result.insertId, nombre, email, id_rol });
+		res.json({ id: result.insertId, nombre, telefono, email, id_rol });
 	} catch (err) {
 		res.status(500).json({ error: err.message });
 	}
