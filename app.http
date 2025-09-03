@@ -1,0 +1,43 @@
+### Registro de un nuevo usuario
+POST http://localhost:3000/auth/register
+Content-Type: application/json
+
+{
+  "nombre": "Joab Guzman",
+  "email": "joab@example.com",
+  "password": "123456789"
+}
+
+### Login
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{
+  "email": "joab@example.com",
+  "password": "123456789"
+}
+
+### Obtener perfil
+GET http://localhost:3000/usuario/me
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Miwicm9sIjoxLCJpYXQiOjE3NTY4NTgyMjUsImV4cCI6MTc1Njg2MTgyNX0.l8meB-WDw9S91ngC_-5RDUFALj5Ul_4hEk3J5pGxTE4
+
+### Actualizar perfil
+PUT http://localhost:3000/usuario/me
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Miwicm9sIjoxLCJpYXQiOjE3NTY4NTgyMjUsImV4cCI6MTc1Njg2MTgyNX0.l8meB-WDw9S91ngC_-5RDUFALj5Ul_4hEk3J5pGxTE4
+Content-Type: application/json
+
+{
+  "nombre": "Joab Ramirez",
+  "telefono": "12345678",
+  "email": "joab@example.com"
+}
+
+### Cambio de Contrasena
+PUT http://localhost:3000/usuario/me/password
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Miwicm9sIjoxLCJpYXQiOjE3NTY4NTgyMjUsImV4cCI6MTc1Njg2MTgyNX0.l8meB-WDw9S91ngC_-5RDUFALj5Ul_4hEk3J5pGxTE4
+Content-Type: application/json
+
+{
+  "currentPassword": "123456789",
+  "newPassword": "987654321"
+}

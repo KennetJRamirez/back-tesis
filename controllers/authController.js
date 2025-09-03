@@ -1,0 +1,42 @@
+import { db } from "../config/db.js";
+import { hashPassword, comparePassword } from "../utils/hash.js";
+import { generateToken } from "../config/jwt.js";
+
+export const register = async (req, res) => {
+	try {
+		const { nombre, email, password, id_rol } = req.body;
+		const rolAsignado = id_rol || 1;
+		const hashed = await hashPassword(password);
+
+		const [result] = await db.query(
+			"INSERT INTO usuario (nombre, email, password, id_rol) VALUES (?, ?, ?, ?)",
+			[nombre, email, hashed, rolAsignado]
+		);
+
+		res.json({ id: result.insertId, nombre, email, id_rol });
+	} catch (err) {
+		res.status(500).json({ error: err.message });
+	}
+};
+
+export const login = async (req, res) => {
+	try {
+		const { email, password } = req.body;
+		const [rows] = await db.query("SELECT * FROM usuario WHERE email = ?", [
+			email,
+		]);
+
+		if (rows.length === 0)
+			return res.status(400).json({ error: "No existe usuario" });
+
+		const usuario = rows[0];
+		const valid = await comparePassword(password, usuario.password);
+		if (!valid)
+			return res.status(400).json({ error: "Password incorrecto" });
+
+		const token = generateToken(usuario);
+		res.json({ token, rol: usuario.id_rol });
+	} catch (err) {
+		res.status(500).json({ error: err.message });
+	}
+};
