@@ -1,0 +1,16 @@
+
+
+
+
+
+POST http://localhost:3000/pedido
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Mywicm9sIjoyLCJpYXQiOjE3NTY4NzY4NDcsImV4cCI6MTc1Njg4MDQ0N30.iHAIfMTuBYBtvh68p3wj50UOsf_N-VnE2Jgy9KNGjbI
+
+{
+  "paquete": { "descripcion": "Sobre importante", "peso": 0.5, "dimensiones": "2x2x1", "fragil": true },
+  "direccion_origen": { "calle_principal": "Av KM", "numero": 5, "calle_secundaria": "X", "zona": 0, "colonia_o_barrio": "Barrio KM", "municipio": "San José Pinula", "departamento": "Guatemala", "codigo_postal": "01007", "referencias": "" },
+  "direccion_destino": { "calle_principal": "Calle KM", "numero": 1, "calle_secundaria": "Y", "zona": 0, "colonia_o_barrio": "Barrio KM", "municipio": "San José Pinula", "departamento": "Guatemala", "codigo_postal": "01008", "referencias": "" },
+  "destinatario": { "nombre": "Cliente 4", "email": "cliente4@mail.com", "telefono": "55544444" },
+  "km_destino": 22
+}

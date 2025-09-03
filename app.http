@@ -79,3 +79,51 @@ Content-Type: application/json
 {
   "activo": false
 }
+
+
+
+
+
+
+
+### Pedidos
+POST http://localhost:3000/pedido
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Mywicm9sIjoyLCJpYXQiOjE3NTY4Njg0ODUsImV4cCI6MTc1Njg3MjA4NX0.-pLnqA121WDZgjcJWeJW_sAGlQCBluY8FUnpvQ2IoMI
+
+{
+  "paquete": {
+    "descripcion": "Caja con libros",
+    "peso": 5.2,
+    "dimensiones": "30x20x15 cm",
+    "fragil": true
+  },
+  "direccion_origen": {
+    "calle_principal": "1a Avenida",
+    "numero": "12",
+    "calle_secundaria": "Calle B",
+    "zona": "3",
+    "colonia_o_barrio": "Colonia Central",
+    "municipio": "Ciudad de Guatemala",
+    "departamento": "Guatemala",
+    "codigo_postal": "01001",
+    "referencias": "Frente al parque"
+  },
+  "direccion_destino": {
+    "calle_principal": "5a Avenida",
+    "numero": "45",
+    "calle_secundaria": "Calle F",
+    "zona": "11",
+    "colonia_o_barrio": "Colonia La Paz",
+    "municipio": "Ciudad de Guatemala",
+    "departamento": "Guatemala",
+    "codigo_postal": "01011",
+    "referencias": "Cerca del mercado"
+  },
+  "destinatario": {
+    "nombre": "Carlos Lopez",
+    "email": "carlos@example.com",
+    "telefono": "12345678"
+  },
+  "km_destino": 5
+}
