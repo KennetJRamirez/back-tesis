@@ -1,30 +1,50 @@
 import { db } from "../config/db.js";
 import { tarifas } from "../utils/tarifas.js";
 
-// Función corregida: municipio+km > km > zona
+// Normaliza strings: quita acentos y pasa a minúsculas
+function normalizeString(str) {
+  return str
+    .normalize("NFD") // separa acentos
+    .replace(/[\u0300-\u036f]/g, "") // quita acentos
+    .trim()
+    .toLowerCase();
+}
+
+// Función robusta: municipio+km > km > zona
 function calcularTarifa({ zona, municipio, km }) {
-  // 1️⃣ Tarifas con municipio + km
+  const munNorm = normalizeString(municipio);
+  const kmNum = Number(km);
+  const zonaNum = Number(zona);
+
+  // 1️⃣ Municipio + km
   for (const t of tarifas) {
-    if (t.municipios && t.municipios.includes(municipio)) {
+    if (
+      t.municipios &&
+      t.municipios.some((m) => normalizeString(m) === munNorm)
+    ) {
       if (t.km) {
-        if (km >= t.km.inicio && km <= t.km.fin) return t.precio;
+        if (kmNum >= t.km.inicio && kmNum <= t.km.fin) return t.precio;
       } else {
         return t.precio;
       }
     }
   }
 
-  // 2️⃣ Tarifas basadas solo en km
+  // 2️⃣ Solo km
   for (const t of tarifas) {
-    if (t.km && km >= t.km.inicio && km <= t.km.fin) {
-      if (t.municipios && !t.municipios.includes(municipio)) continue;
+    if (t.km && kmNum >= t.km.inicio && kmNum <= t.km.fin) {
+      if (
+        t.municipios &&
+        !t.municipios.some((m) => normalizeString(m) === munNorm)
+      )
+        continue;
       return t.precio;
     }
   }
 
-  // 3️⃣ Tarifas basadas solo en zona
+  // 3️⃣ Solo zona
   for (const t of tarifas) {
-    if (t.zonas && t.zonas.includes(Number(zona))) return t.precio;
+    if (t.zonas && t.zonas.includes(zonaNum)) return t.precio;
   }
 
   return null;
@@ -66,9 +86,9 @@ export const createPedido = async (req, res) => {
     );
     const id_direccion_destino = destinoResult.insertId;
 
-    // 4️⃣ Calcular costo (municipio+km > km > zona)
+    // 4️⃣ Calcular costo
     const costo = calcularTarifa({
-      zona: parseInt(direccion_destino.zona),
+      zona: direccion_destino.zona,
       municipio: direccion_destino.municipio,
       km: km_destino,
     });

@@ -8,9 +8,9 @@ Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Mywicm9sIjoyLCJpYXQiOjE3NTY4NzY4NDcsImV4cCI6MTc1Njg4MDQ0N30.iHAIfMTuBYBtvh68p3wj50UOsf_N-VnE2Jgy9KNGjbI
 
 {
-  "paquete": { "descripcion": "Sobre importante", "peso": 0.5, "dimensiones": "2x2x1", "fragil": true },
-  "direccion_origen": { "calle_principal": "Av KM", "numero": 5, "calle_secundaria": "X", "zona": 0, "colonia_o_barrio": "Barrio KM", "municipio": "San José Pinula", "departamento": "Guatemala", "codigo_postal": "01007", "referencias": "" },
-  "direccion_destino": { "calle_principal": "Calle KM", "numero": 1, "calle_secundaria": "Y", "zona": 0, "colonia_o_barrio": "Barrio KM", "municipio": "San José Pinula", "departamento": "Guatemala", "codigo_postal": "01008", "referencias": "" },
-  "destinatario": { "nombre": "Cliente 4", "email": "cliente4@mail.com", "telefono": "55544444" },
-  "km_destino": 22
+    "paquete": { "descripcion": "Caja frágil", "peso": 3, "dimensiones": "25x20x15", "fragil": true },
+    "direccion_origen": { "calle_principal": "Calle K", "numero": "50", "calle_secundaria": "Calle L", "zona": "6", "colonia_o_barrio": "Zona 6", "municipio": "Guatemala", "departamento": "Guatemala", "codigo_postal": "01006", "referencias": "" },
+    "direccion_destino": { "calle_principal": "6a Avenida", "numero": "90", "calle_secundaria": "Calle M", "zona": "14", "colonia_o_barrio": "Zona 14", "municipio": "Fraijanes", "departamento": "Guatemala", "codigo_postal": "01014", "referencias": "" },
+    "destinatario": { "nombre": "Miguel Torres", "email": "miguel@example.com", "telefono": "5555559" },
+    "km_destino": 23
 }
