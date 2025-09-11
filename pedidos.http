@@ -5,12 +5,40 @@
 
 POST http://localhost:3000/pedido
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Mywicm9sIjoyLCJpYXQiOjE3NTY4NzY4NDcsImV4cCI6MTc1Njg4MDQ0N30.iHAIfMTuBYBtvh68p3wj50UOsf_N-VnE2Jgy9KNGjbI
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Mywicm9sIjoxLCJpYXQiOjE3NTc1NDM0NzQsImV4cCI6MTc1NzU0NzA3NH0.hdjv1QNXdFkFStb-PWqNmgVfLGAyWzTRMF5d-98ns5Q
 
 {
-    "paquete": { "descripcion": "Caja frágil", "peso": 3, "dimensiones": "25x20x15", "fragil": true },
-    "direccion_origen": { "calle_principal": "Calle K", "numero": "50", "calle_secundaria": "Calle L", "zona": "6", "colonia_o_barrio": "Zona 6", "municipio": "Guatemala", "departamento": "Guatemala", "codigo_postal": "01006", "referencias": "" },
-    "direccion_destino": { "calle_principal": "6a Avenida", "numero": "90", "calle_secundaria": "Calle M", "zona": "14", "colonia_o_barrio": "Zona 14", "municipio": "Fraijanes", "departamento": "Guatemala", "codigo_postal": "01014", "referencias": "" },
-    "destinatario": { "nombre": "Miguel Torres", "email": "miguel@example.com", "telefono": "5555559" },
-    "km_destino": 23
+    "paquete": {
+        "descripcion": "Paquete electrónico frágil",
+        "peso": 2.5,
+        "dimensiones": "30x20x10",
+        "fragil": true
+    },
+    "direccion_origen": {
+        "calle_principal": "7a Avenida",
+        "numero": "12",
+        "calle_secundaria": "10a Calle",
+        "zona": "1",
+        "colonia_o_barrio": "Centro",
+        "municipio": "Guatemala",
+        "departamento": "Guatemala",
+        "codigo_postal": "01001",
+        "referencias": "Frente al Parque Central"
+    },
+    "direccion_destino": {
+        "calle_principal": "Boulevard Los Próceres",
+        "numero": "20",
+        "calle_secundaria": "Calle Real",
+        "zona": "10",
+        "colonia_o_barrio": "Las Charcas",
+        "municipio": "Guatemala",
+        "departamento": "Guatemala",
+        "codigo_postal": "01010",
+        "referencias": "Cerca del centro comercial"
+    },
+    "destinatario": {
+        "nombre": "Ana López",
+        "email": "ana.lopez@example.com",
+        "telefono": "55551234"
+    }
 }

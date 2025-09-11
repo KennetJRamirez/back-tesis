@@ -40,3 +40,15 @@ export const login = async (req, res) => {
 		res.status(500).json({ error: err.message });
 	}
 };
+
+export const logout = (req, res) => {
+    try {
+        // Limpiar cookies en el navegador
+        res.clearCookie("token", { path: "/", sameSite: "None", secure: true });
+        res.clearCookie("rol", { path: "/", sameSite: "None", secure: true });
+
+        res.status(200).json({ message: "Logout exitoso" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};

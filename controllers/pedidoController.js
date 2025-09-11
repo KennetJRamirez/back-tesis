@@ -1,22 +1,24 @@
+import fetch from "node-fetch";
+import dotenv from "dotenv";
 import { db } from "../config/db.js";
 import { tarifas } from "../utils/tarifas.js";
+dotenv.config();
 
-// Normaliza strings: quita acentos y pasa a minúsculas
+const MAPBOX_TOKEN = process.env.MAPBOX_TOKEN;
+
 function normalizeString(str) {
   return str
-    .normalize("NFD") // separa acentos
-    .replace(/[\u0300-\u036f]/g, "") // quita acentos
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
     .trim()
     .toLowerCase();
 }
 
-// Función robusta: municipio+km > km > zona
 function calcularTarifa({ zona, municipio, km }) {
   const munNorm = normalizeString(municipio);
   const kmNum = Number(km);
   const zonaNum = Number(zona);
 
-  // 1️⃣ Municipio + km
   for (const t of tarifas) {
     if (
       t.municipios &&
@@ -30,7 +32,6 @@ function calcularTarifa({ zona, municipio, km }) {
     }
   }
 
-  // 2️⃣ Solo km
   for (const t of tarifas) {
     if (t.km && kmNum >= t.km.inicio && kmNum <= t.km.fin) {
       if (
@@ -42,7 +43,6 @@ function calcularTarifa({ zona, municipio, km }) {
     }
   }
 
-  // 3️⃣ Solo zona
   for (const t of tarifas) {
     if (t.zonas && t.zonas.includes(zonaNum)) return t.precio;
   }
@@ -50,17 +50,36 @@ function calcularTarifa({ zona, municipio, km }) {
   return null;
 }
 
+async function geocodeDireccion(direccion) {
+  const query = encodeURIComponent(
+    `${direccion.calle_principal} ${direccion.numero}, ${direccion.municipio}, ${direccion.departamento}`
+  );
+  const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${query}.json?access_token=${MAPBOX_TOKEN}`;
+  const resp = await fetch(url);
+  const data = await resp.json();
+  if (!data.features?.length)
+    throw new Error("No se pudo geocodificar la dirección");
+  return data.features[0].geometry.coordinates;
+}
+
+async function calcularKm(origen, destino) {
+  const [lon1, lat1] = await geocodeDireccion(origen);
+  const [lon2, lat2] = await geocodeDireccion(destino);
+
+  const url = `https://api.mapbox.com/directions/v5/mapbox/driving/${lon1},${lat1};${lon2},${lat2}?geometries=geojson&access_token=${MAPBOX_TOKEN}`;
+  const resp = await fetch(url);
+  const data = await resp.json();
+
+  if (!data.routes?.length) throw new Error("No se pudo calcular ruta");
+  return data.routes[0].distance / 1000; // km
+}
+
 export const createPedido = async (req, res) => {
   try {
-    const {
-      paquete,
-      direccion_origen,
-      direccion_destino,
-      destinatario,
-      km_destino,
-    } = req.body;
+    const { paquete, direccion_origen, direccion_destino, destinatario } =
+      req.body;
 
-    // 1️⃣ Insertar paquete
+    // Insertar paquete
     const [paqueteResult] = await db.query(
       "INSERT INTO paquete (descripcion, peso, dimensiones, fragil) VALUES (?, ?, ?, ?)",
       [
@@ -72,21 +91,24 @@ export const createPedido = async (req, res) => {
     );
     const id_paquete = paqueteResult.insertId;
 
-    // 2️⃣ Insertar dirección origen
+    // Insertar dirección origen
     const [origenResult] = await db.query(
       "INSERT INTO direccion (calle_principal, numero, calle_secundaria, zona, colonia_o_barrio, municipio, departamento, codigo_postal, referencias) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
       Object.values(direccion_origen)
     );
     const id_direccion_origen = origenResult.insertId;
 
-    // 3️⃣ Insertar dirección destino
+    // Insertar dirección destino
     const [destinoResult] = await db.query(
       "INSERT INTO direccion (calle_principal, numero, calle_secundaria, zona, colonia_o_barrio, municipio, departamento, codigo_postal, referencias) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
       Object.values(direccion_destino)
     );
     const id_direccion_destino = destinoResult.insertId;
 
-    // 4️⃣ Calcular costo
+    // Calcular distancia
+    const km_destino = await calcularKm(direccion_origen, direccion_destino);
+
+    // Calcular costo
     const costo = calcularTarifa({
       zona: direccion_destino.zona,
       municipio: direccion_destino.municipio,
@@ -95,7 +117,7 @@ export const createPedido = async (req, res) => {
 
     if (!costo) return res.status(400).json({ error: "No se encontró tarifa" });
 
-    // 5️⃣ Insertar pedido
+    // Insertar pedido
     const [pedidoResult] = await db.query(
       "INSERT INTO pedido (id_usuario, id_paquete, id_direccion_origen, id_direccion_destino, nombre_destinatario, email_destinatario, telefono_destinatario) VALUES (?, ?, ?, ?, ?, ?, ?)",
       [
@@ -110,13 +132,22 @@ export const createPedido = async (req, res) => {
     );
     const id_pedido = pedidoResult.insertId;
 
-    // 6️⃣ Insertar envío
+    // Insertar envío
     await db.query(
       "INSERT INTO envio (id_pedido, costo, estado) VALUES (?, ?, 'En tránsito')",
       [id_pedido, costo]
     );
 
-    res.json({ msg: "Pedido creado", id_pedido, costo });
+    // Redondeos
+    const kmRedondeado = Number(km_destino.toFixed(1));
+    const costoRedondeado = Number(costo.toFixed(2));
+
+    res.json({
+      msg: "Pedido creado",
+      id_pedido,
+      costo: costoRedondeado,
+      km_destino: kmRedondeado,
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
