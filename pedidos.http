@@ -5,40 +5,40 @@
 
 POST http://localhost:3000/pedido
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Mywicm9sIjoxLCJpYXQiOjE3NTc1NDM0NzQsImV4cCI6MTc1NzU0NzA3NH0.hdjv1QNXdFkFStb-PWqNmgVfLGAyWzTRMF5d-98ns5Q
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Mywicm9sIjoxLCJpYXQiOjE3NTc1NzU4MTEsImV4cCI6MTc1NzU3OTQxMX0.CMMg0ZQyLuyor3BbJktGjlqoL23N1T51Kpy-2SFfBJM
 
 {
-    "paquete": {
-        "descripcion": "Paquete electrónico frágil",
-        "peso": 2.5,
-        "dimensiones": "30x20x10",
-        "fragil": true
-    },
-    "direccion_origen": {
-        "calle_principal": "7a Avenida",
-        "numero": "12",
-        "calle_secundaria": "10a Calle",
-        "zona": "1",
-        "colonia_o_barrio": "Centro",
-        "municipio": "Guatemala",
-        "departamento": "Guatemala",
-        "codigo_postal": "01001",
-        "referencias": "Frente al Parque Central"
-    },
-    "direccion_destino": {
-        "calle_principal": "Boulevard Los Próceres",
-        "numero": "20",
-        "calle_secundaria": "Calle Real",
-        "zona": "10",
-        "colonia_o_barrio": "Las Charcas",
-        "municipio": "Guatemala",
-        "departamento": "Guatemala",
-        "codigo_postal": "01010",
-        "referencias": "Cerca del centro comercial"
-    },
-    "destinatario": {
-        "nombre": "Ana López",
-        "email": "ana.lopez@example.com",
-        "telefono": "55551234"
-    }
+  "paquete": {
+    "descripcion": "Televisor LED 55 pulgadas",
+    "peso": 10.5,
+    "dimensiones": "125x80x20",
+    "fragil": true
+  },
+  "direccion_origen": {
+    "calle_principal": "Boulevard Vista Hermosa",
+    "numero": "5-60",
+    "calle_secundaria": "Diagonal 6",
+    "zona": "15",
+    "colonia_o_barrio": "Vista Hermosa II",
+    "municipio": "Guatemala",
+    "departamento": "Guatemala",
+    "codigo_postal": "01015",
+    "referencias": "Cerca del Colegio Americano"
+  },
+  "direccion_destino": {
+    "calle_principal": "Carretera a El Salvador",
+    "numero": "Km 18.5",
+    "calle_secundaria": "Entrada a San José Pinula",
+    "zona": "1", 
+    "colonia_o_barrio": "Residenciales Los Álamos",
+    "municipio": "San José Pinula",
+    "departamento": "Guatemala",
+    "codigo_postal": "01052",
+    "referencias": "Casa con portón café al final de la cuadra"
+  },
+  "destinatario": {
+    "nombre": "Luis Fernández",
+    "email": "luis.fernandez@test.com",
+    "telefono": "50244556677"
+  }
 }

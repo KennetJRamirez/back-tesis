@@ -1,11 +1,12 @@
 import fetch from "node-fetch";
 import dotenv from "dotenv";
 import { db } from "../config/db.js";
-import { tarifas } from "../utils/tarifas.js";
+import { tarifas, calcularTarifa } from "../utils/tarifas.js";
 dotenv.config();
 
 const MAPBOX_TOKEN = process.env.MAPBOX_TOKEN;
 
+// Normaliza strings para comparación
 function normalizeString(str) {
   return str
     .normalize("NFD")
@@ -14,42 +15,16 @@ function normalizeString(str) {
     .toLowerCase();
 }
 
-function calcularTarifa({ zona, municipio, km }) {
-  const munNorm = normalizeString(municipio);
-  const kmNum = Number(km);
-  const zonaNum = Number(zona);
-
-  for (const t of tarifas) {
-    if (
-      t.municipios &&
-      t.municipios.some((m) => normalizeString(m) === munNorm)
-    ) {
-      if (t.km) {
-        if (kmNum >= t.km.inicio && kmNum <= t.km.fin) return t.precio;
-      } else {
-        return t.precio;
-      }
-    }
+// Convierte "Zona 1" a número 1
+function parseZona(zona) {
+  if (typeof zona === "string") {
+    const match = zona.match(/\d+/);
+    return match ? Number(match[0]) : null;
   }
-
-  for (const t of tarifas) {
-    if (t.km && kmNum >= t.km.inicio && kmNum <= t.km.fin) {
-      if (
-        t.municipios &&
-        !t.municipios.some((m) => normalizeString(m) === munNorm)
-      )
-        continue;
-      return t.precio;
-    }
-  }
-
-  for (const t of tarifas) {
-    if (t.zonas && t.zonas.includes(zonaNum)) return t.precio;
-  }
-
-  return null;
+  return Number(zona);
 }
 
+// Función para geocodificar con Mapbox
 async function geocodeDireccion(direccion) {
   const query = encodeURIComponent(
     `${direccion.calle_principal} ${direccion.numero}, ${direccion.municipio}, ${direccion.departamento}`
@@ -62,6 +37,7 @@ async function geocodeDireccion(direccion) {
   return data.features[0].geometry.coordinates;
 }
 
+// Calcula km usando Mapbox Directions API
 async function calcularKm(origen, destino) {
   const [lon1, lat1] = await geocodeDireccion(origen);
   const [lon2, lat2] = await geocodeDireccion(destino);
@@ -74,6 +50,7 @@ async function calcularKm(origen, destino) {
   return data.routes[0].distance / 1000; // km
 }
 
+// Crea pedido
 export const createPedido = async (req, res) => {
   try {
     const { paquete, direccion_origen, direccion_destino, destinatario } =
@@ -108,14 +85,43 @@ export const createPedido = async (req, res) => {
     // Calcular distancia
     const km_destino = await calcularKm(direccion_origen, direccion_destino);
 
+    // Parsear zona destino correctamente
+    const zonaNum = parseZona(direccion_destino.zona);
+
     // Calcular costo
     const costo = calcularTarifa({
-      zona: direccion_destino.zona,
+      zona: zonaNum,
       municipio: direccion_destino.municipio,
       km: km_destino,
     });
 
-    if (!costo) return res.status(400).json({ error: "No se encontró tarifa" });
+    if (!costo)
+      return res.status(400).json({
+        error: "No se encontró tarifa para la ruta indicada.",
+      });
+
+    // Verificar repartidor disponible en la zona
+    const [repartidores] = await db.query(
+      `SELECT rz.id_repartidor, COUNT(e.id_envio) AS carga
+       FROM repartidor_zona rz
+       LEFT JOIN envio e 
+         ON e.id_repartidor = rz.id_repartidor
+         AND e.estado != 'Entregado'
+       WHERE rz.municipio = ? AND rz.zona = ?
+       GROUP BY rz.id_repartidor
+       ORDER BY carga ASC
+       LIMIT 1`,
+      [direccion_destino.municipio, zonaNum]
+    );
+
+    if (!repartidores.length) {
+      return res.status(400).json({
+        error:
+          "Lo sentimos, actualmente no hay repartidores disponibles en tu zona. Intenta más tarde o cambia la dirección.",
+      });
+    }
+
+    const id_repartidor = repartidores[0].id_repartidor;
 
     // Insertar pedido
     const [pedidoResult] = await db.query(
@@ -132,10 +138,10 @@ export const createPedido = async (req, res) => {
     );
     const id_pedido = pedidoResult.insertId;
 
-    // Insertar envío
+    // Insertar envío con repartidor asignado
     await db.query(
-      "INSERT INTO envio (id_pedido, costo, estado) VALUES (?, ?, 'En tránsito')",
-      [id_pedido, costo]
+      "INSERT INTO envio (id_pedido, id_repartidor, costo, estado) VALUES (?, ?, ?, 'En tránsito')",
+      [id_pedido, id_repartidor, costo]
     );
 
     // Redondeos
@@ -145,6 +151,7 @@ export const createPedido = async (req, res) => {
     res.json({
       msg: "Pedido creado",
       id_pedido,
+      id_repartidor,
       costo: costoRedondeado,
       km_destino: kmRedondeado,
     });

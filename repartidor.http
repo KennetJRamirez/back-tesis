@@ -1,0 +1,36 @@
+### Login
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{
+  "email": "carlos.perez@example.com",
+  "password": "987654321"
+}
+
+### Repartidor - Perfil
+GET http://localhost:3000/repartidor/me
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6OSwicm9sIjoyLCJpYXQiOjE3NTc1NzMyNTMsImV4cCI6MTc1NzU3Njg1M30.dI1yM3CEANd8weyYHfn1SmBaPUiJYWa2iOCDWSpnlg8
+
+
+### REPARTIDOR - PEDIDOS
+GET http://localhost:3000/repartidor/pedidos/activos
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6OSwicm9sIjoyLCJpYXQiOjE3NTc1NzMyNTMsImV4cCI6MTc1NzU3Njg1M30.dI1yM3CEANd8weyYHfn1SmBaPUiJYWa2iOCDWSpnlg8
+
+###
+
+GET http://localhost:3000/repartidor/pedidos/historial
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6OSwicm9sIjoyLCJpYXQiOjE3NTc1NzMyNTMsImV4cCI6MTc1NzU3Njg1M30.dI1yM3CEANd8weyYHfn1SmBaPUiJYWa2iOCDWSpnlg8
+
+
+###
+GET http://localhost:3000/repartidor/pedidos/77
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6OSwicm9sIjoyLCJpYXQiOjE3NTc1NzMyNTMsImV4cCI6MTc1NzU3Njg1M30.dI1yM3CEANd8weyYHfn1SmBaPUiJYWa2iOCDWSpnlg8
+
+### Cambio estado - Recolectado
+PUT http://localhost:3000/repartidor/pedidos/77/recolectado
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6OSwicm9sIjoyLCJpYXQiOjE3NTc1NzMyNTMsImV4cCI6MTc1NzU3Njg1M30.dI1yM3CEANd8weyYHfn1SmBaPUiJYWa2iOCDWSpnlg8
+
+
+### Cambio estado - Entregado
+PUT http://localhost:3000/repartidor/pedidos/77/entregado
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6OSwicm9sIjoyLCJpYXQiOjE3NTc1NzMyNTMsImV4cCI6MTc1NzU3Njg1M30.dI1yM3CEANd8weyYHfn1SmBaPUiJYWa2iOCDWSpnlg8
