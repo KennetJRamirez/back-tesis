@@ -1,4 +1,5 @@
 import { db } from "../config/db.js";
+import { hashPassword, comparePassword } from "../utils/hash.js";
 
 // Ver perfil repartidor (igual que usuario)
 export const getProfile = async (req, res) => {
@@ -29,7 +30,6 @@ export const updateProfile = async (req, res) => {
 };
 
 // Cambiar contraseña
-import { hashPassword, comparePassword } from "../utils/hash.js";
 export const changePassword = async (req, res) => {
   try {
     const { currentPassword, newPassword } = req.body;
@@ -59,7 +59,37 @@ export const changePassword = async (req, res) => {
 export const getAssignedPedidos = async (req, res) => {
   try {
     const [rows] = await db.query(
-      `SELECT e.id_envio, e.estado, p.id_pedido, pa.descripcion AS paquete, d1.municipio AS origen, d2.municipio AS destino
+      `SELECT 
+         e.id_envio,
+         e.estado,
+         e.costo,
+         e.fecha_asignacion,
+         p.id_pedido,
+         pa.descripcion AS paquete,
+         pa.peso,
+         pa.dimensiones,
+         pa.fragil,
+         d1.calle_principal AS origen_calle,
+         d1.numero AS origen_numero,
+         d1.calle_secundaria AS origen_secundaria,
+         d1.zona AS origen_zona,
+         d1.colonia_o_barrio AS origen_colonia,
+         d1.municipio AS origen_municipio,
+         d1.departamento AS origen_departamento,
+         d1.codigo_postal AS origen_cp,
+         d1.referencias AS origen_referencias,
+         d2.calle_principal AS destino_calle,
+         d2.numero AS destino_numero,
+         d2.calle_secundaria AS destino_secundaria,
+         d2.zona AS destino_zona,
+         d2.colonia_o_barrio AS destino_colonia,
+         d2.municipio AS destino_municipio,
+         d2.departamento AS destino_departamento,
+         d2.codigo_postal AS destino_cp,
+         d2.referencias AS destino_referencias,
+         p.nombre_destinatario,
+         p.email_destinatario,
+         p.telefono_destinatario
        FROM envio e
        JOIN pedido p ON e.id_pedido = p.id_pedido
        JOIN paquete pa ON p.id_paquete = pa.id_paquete
@@ -78,7 +108,37 @@ export const getAssignedPedidos = async (req, res) => {
 export const getHistorialPedidos = async (req, res) => {
   try {
     const [rows] = await db.query(
-      `SELECT e.id_envio, e.estado, p.id_pedido, pa.descripcion AS paquete, d1.municipio AS origen, d2.municipio AS destino, e.fecha_asignacion
+      `SELECT 
+         e.id_envio,
+         e.estado,
+         e.costo,
+         e.fecha_asignacion,
+         p.id_pedido,
+         pa.descripcion AS paquete,
+         pa.peso,
+         pa.dimensiones,
+         pa.fragil,
+         d1.calle_principal AS origen_calle,
+         d1.numero AS origen_numero,
+         d1.calle_secundaria AS origen_secundaria,
+         d1.zona AS origen_zona,
+         d1.colonia_o_barrio AS origen_colonia,
+         d1.municipio AS origen_municipio,
+         d1.departamento AS origen_departamento,
+         d1.codigo_postal AS origen_cp,
+         d1.referencias AS origen_referencias,
+         d2.calle_principal AS destino_calle,
+         d2.numero AS destino_numero,
+         d2.calle_secundaria AS destino_secundaria,
+         d2.zona AS destino_zona,
+         d2.colonia_o_barrio AS destino_colonia,
+         d2.municipio AS destino_municipio,
+         d2.departamento AS destino_departamento,
+         d2.codigo_postal AS destino_cp,
+         d2.referencias AS destino_referencias,
+         p.nombre_destinatario,
+         p.email_destinatario,
+         p.telefono_destinatario
        FROM envio e
        JOIN pedido p ON e.id_pedido = p.id_pedido
        JOIN paquete pa ON p.id_paquete = pa.id_paquete
@@ -93,7 +153,7 @@ export const getHistorialPedidos = async (req, res) => {
   }
 };
 
-// Última posición de un envío (para Mapbox)
+// Última posición de un envío
 export const getLastPosition = async (req, res) => {
   try {
     const { id_envio } = req.params;

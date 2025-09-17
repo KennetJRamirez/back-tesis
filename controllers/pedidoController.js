@@ -159,3 +159,31 @@ export const createPedido = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+// Ver todos los pedidos del usuario logueado
+export const getMisPedidos = async (req, res) => {
+  try {
+    const [rows] = await db.query(
+      `SELECT 
+         p.id_pedido,
+         e.id_envio,
+         e.estado,
+         e.costo,
+         e.fecha_asignacion,
+         pa.descripcion AS paquete,
+         d1.municipio AS origen,
+         d2.municipio AS destino
+       FROM pedido p
+       JOIN envio e ON p.id_pedido = e.id_pedido
+       JOIN paquete pa ON p.id_paquete = pa.id_paquete
+       JOIN direccion d1 ON p.id_direccion_origen = d1.id_direccion
+       JOIN direccion d2 ON p.id_direccion_destino = d2.id_direccion
+       WHERE p.id_usuario = ?`,
+      [req.user.id]
+    );
+
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
