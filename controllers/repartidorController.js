@@ -1,7 +1,7 @@
 import { db } from "../config/db.js";
 import { hashPassword, comparePassword } from "../utils/hash.js";
 
-// Ver perfil repartidor (igual que usuario)
+// ---------------- PERFIL ----------------
 export const getProfile = async (req, res) => {
   try {
     const [rows] = await db.query(
@@ -15,7 +15,6 @@ export const getProfile = async (req, res) => {
   }
 };
 
-// Actualizar perfil
 export const updateProfile = async (req, res) => {
   try {
     const { nombre, telefono, email } = req.body;
@@ -29,7 +28,6 @@ export const updateProfile = async (req, res) => {
   }
 };
 
-// Cambiar contraseña
 export const changePassword = async (req, res) => {
   try {
     const { currentPassword, newPassword } = req.body;
@@ -48,48 +46,40 @@ export const changePassword = async (req, res) => {
       hashed,
       req.user.id,
     ]);
-
     res.json({ msg: "Contraseña actualizada" });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
 
-// Pedidos activos asignados al repartidor
+// ---------------- PEDIDOS ----------------
 export const getAssignedPedidos = async (req, res) => {
   try {
     const [rows] = await db.query(
-      `SELECT 
-         e.id_envio,
-         e.estado,
-         e.costo,
-         e.fecha_asignacion,
-         p.id_pedido,
-         pa.descripcion AS paquete,
-         pa.peso,
-         pa.dimensiones,
-         pa.fragil,
-         d1.calle_principal AS origen_calle,
-         d1.numero AS origen_numero,
-         d1.calle_secundaria AS origen_secundaria,
-         d1.zona AS origen_zona,
-         d1.colonia_o_barrio AS origen_colonia,
-         d1.municipio AS origen_municipio,
-         d1.departamento AS origen_departamento,
-         d1.codigo_postal AS origen_cp,
-         d1.referencias AS origen_referencias,
-         d2.calle_principal AS destino_calle,
-         d2.numero AS destino_numero,
-         d2.calle_secundaria AS destino_secundaria,
-         d2.zona AS destino_zona,
-         d2.colonia_o_barrio AS destino_colonia,
-         d2.municipio AS destino_municipio,
-         d2.departamento AS destino_departamento,
-         d2.codigo_postal AS destino_cp,
-         d2.referencias AS destino_referencias,
-         p.nombre_destinatario,
-         p.email_destinatario,
-         p.telefono_destinatario
+      `SELECT e.id_envio, e.estado, e.costo, e.fecha_asignacion,
+              p.id_pedido, pa.descripcion AS paquete, pa.peso, pa.dimensiones, pa.fragil,
+              
+              -- Dirección origen
+              d1.calle_principal AS origen_calle,
+              d1.numero AS origen_numero,
+              d1.calle_secundaria AS origen_secundaria,
+              d1.colonia_o_barrio AS origen_colonia,
+              d1.zona AS origen_zona,
+              d1.municipio AS origen_municipio,
+              d1.departamento AS origen_departamento,
+              d1.codigo_postal AS origen_cp,
+              
+              -- Dirección destino
+              d2.calle_principal AS destino_calle,
+              d2.numero AS destino_numero,
+              d2.calle_secundaria AS destino_secundaria,
+              d2.colonia_o_barrio AS destino_colonia,
+              d2.zona AS destino_zona,
+              d2.municipio AS destino_municipio,
+              d2.departamento AS destino_departamento,
+              d2.codigo_postal AS destino_cp,
+              
+              p.nombre_destinatario, p.email_destinatario, p.telefono_destinatario
        FROM envio e
        JOIN pedido p ON e.id_pedido = p.id_pedido
        JOIN paquete pa ON p.id_paquete = pa.id_paquete
@@ -104,41 +94,33 @@ export const getAssignedPedidos = async (req, res) => {
   }
 };
 
-// Historial de pedidos completados
 export const getHistorialPedidos = async (req, res) => {
   try {
     const [rows] = await db.query(
-      `SELECT 
-         e.id_envio,
-         e.estado,
-         e.costo,
-         e.fecha_asignacion,
-         p.id_pedido,
-         pa.descripcion AS paquete,
-         pa.peso,
-         pa.dimensiones,
-         pa.fragil,
-         d1.calle_principal AS origen_calle,
-         d1.numero AS origen_numero,
-         d1.calle_secundaria AS origen_secundaria,
-         d1.zona AS origen_zona,
-         d1.colonia_o_barrio AS origen_colonia,
-         d1.municipio AS origen_municipio,
-         d1.departamento AS origen_departamento,
-         d1.codigo_postal AS origen_cp,
-         d1.referencias AS origen_referencias,
-         d2.calle_principal AS destino_calle,
-         d2.numero AS destino_numero,
-         d2.calle_secundaria AS destino_secundaria,
-         d2.zona AS destino_zona,
-         d2.colonia_o_barrio AS destino_colonia,
-         d2.municipio AS destino_municipio,
-         d2.departamento AS destino_departamento,
-         d2.codigo_postal AS destino_cp,
-         d2.referencias AS destino_referencias,
-         p.nombre_destinatario,
-         p.email_destinatario,
-         p.telefono_destinatario
+      `SELECT e.id_envio, e.estado, e.costo, e.fecha_asignacion,
+              p.id_pedido, pa.descripcion AS paquete, pa.peso, pa.dimensiones, pa.fragil,
+              
+              -- Dirección origen
+              d1.calle_principal AS origen_calle,
+              d1.numero AS origen_numero,
+              d1.calle_secundaria AS origen_secundaria,
+              d1.colonia_o_barrio AS origen_colonia,
+              d1.zona AS origen_zona,
+              d1.municipio AS origen_municipio,
+              d1.departamento AS origen_departamento,
+              d1.codigo_postal AS origen_cp,
+              
+              -- Dirección destino
+              d2.calle_principal AS destino_calle,
+              d2.numero AS destino_numero,
+              d2.calle_secundaria AS destino_secundaria,
+              d2.colonia_o_barrio AS destino_colonia,
+              d2.zona AS destino_zona,
+              d2.municipio AS destino_municipio,
+              d2.departamento AS destino_departamento,
+              d2.codigo_postal AS destino_cp,
+              
+              p.nombre_destinatario, p.email_destinatario, p.telefono_destinatario
        FROM envio e
        JOIN pedido p ON e.id_pedido = p.id_pedido
        JOIN paquete pa ON p.id_paquete = pa.id_paquete
@@ -153,80 +135,44 @@ export const getHistorialPedidos = async (req, res) => {
   }
 };
 
-// Última posición de un envío
-export const getLastPosition = async (req, res) => {
+
+// ---------------- TRACKING ----------------
+export const savePosition = async (req, res) => {
   try {
     const { id_envio } = req.params;
+    const { latitud, longitud } = req.body;
+
+    await db.query(
+      "INSERT INTO tracking_envio (id_envio, latitud, longitud, fecha_hora) VALUES (?, ?, ?, NOW())",
+      [id_envio, latitud, longitud]
+    );
+    res.json({ msg: "Posición guardada" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+export const getLastPosition = async (req, res) => {
+  try {
     const [rows] = await db.query(
       `SELECT latitud, longitud, fecha_hora 
        FROM tracking_envio 
        WHERE id_envio = ? 
        ORDER BY fecha_hora DESC 
        LIMIT 1`,
-      [id_envio]
+      [req.params.id_envio]
     );
-    res.json(rows[0] || null);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-};
-
-// Detalle completo de un pedido específico
-export const getPedidoDetalle = async (req, res) => {
-  try {
-    const { id_pedido } = req.params;
-
-    const [rows] = await db.query(
-      `SELECT 
-         e.id_envio,
-         e.estado,
-         e.costo,
-         e.fecha_asignacion,
-         p.id_pedido,
-         pa.descripcion AS paquete,
-         pa.peso,
-         pa.dimensiones,
-         pa.fragil,
-         d1.calle_principal AS origen_calle,
-         d1.numero AS origen_numero,
-         d1.calle_secundaria AS origen_secundaria,
-         d1.zona AS origen_zona,
-         d1.colonia_o_barrio AS origen_colonia,
-         d1.municipio AS origen_municipio,
-         d1.departamento AS origen_departamento,
-         d1.codigo_postal AS origen_cp,
-         d1.referencias AS origen_referencias,
-         d2.calle_principal AS destino_calle,
-         d2.numero AS destino_numero,
-         d2.calle_secundaria AS destino_secundaria,
-         d2.zona AS destino_zona,
-         d2.colonia_o_barrio AS destino_colonia,
-         d2.municipio AS destino_municipio,
-         d2.departamento AS destino_departamento,
-         d2.codigo_postal AS destino_cp,
-         d2.referencias AS destino_referencias,
-         p.nombre_destinatario,
-         p.email_destinatario,
-         p.telefono_destinatario
-       FROM envio e
-       JOIN pedido p ON e.id_pedido = p.id_pedido
-       JOIN paquete pa ON p.id_paquete = pa.id_paquete
-       JOIN direccion d1 ON p.id_direccion_origen = d1.id_direccion
-       JOIN direccion d2 ON p.id_direccion_destino = d2.id_direccion
-       WHERE p.id_pedido = ? AND e.id_repartidor = ?`,
-      [id_pedido, req.user.id]
-    );
-
-    if (!rows.length)
-      return res.status(404).json({ error: "Pedido no encontrado" });
-
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'No hay posiciones registradas' });
+    }
     res.json(rows[0]);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
 
-// --- NUEVAS RUTAS PARA CAMBIAR ESTADO ---
+
+// ---------------- ESTADO ----------------
 export const marcarRecolectado = async (req, res) => {
   try {
     const { id_envio } = req.params;

@@ -1,35 +1,39 @@
-import { Router } from "express";
+import express from "express";
 import { authMiddleware } from "../middlewares/authMiddleware.js";
-import { authorizeRoles } from "../middlewares/roleMiddleware.js";
 import {
   getProfile,
   updateProfile,
   changePassword,
   getAssignedPedidos,
   getHistorialPedidos,
+  savePosition,
   getLastPosition,
-  getPedidoDetalle,
   marcarRecolectado,
   marcarEntregado,
 } from "../controllers/repartidorController.js";
 
-const router = Router();
+const router = express.Router();
 
-router.use(authMiddleware, authorizeRoles(2));
+// Middleware para todas las rutas de repartidor
+router.use(authMiddleware);
 
-router.get("/me", getProfile);
-router.put("/me", updateProfile);
-router.put("/me/password", changePassword);
+// PERFIL
+router.get("/perfil", getProfile);
+router.put("/perfil", updateProfile);
+router.put("/perfil/password", changePassword);
 
-// Pedidos
+// PEDIDOS
 router.get("/pedidos/activos", getAssignedPedidos);
 router.get("/pedidos/historial", getHistorialPedidos);
 
-// Tracking
+// TRACKING
+router.post("/tracking/:id_envio", savePosition);
 router.get("/tracking/:id_envio", getLastPosition);
 
-router.get("/pedidos/:id_pedido", getPedidoDetalle);
-
+// ESTADO PEDIDOS
 router.put("/pedidos/:id_envio/recolectado", marcarRecolectado);
 router.put("/pedidos/:id_envio/entregado", marcarEntregado);
+
+router.get('/tracking/:id_envio/last', authMiddleware, getLastPosition);
+
 export default router;
