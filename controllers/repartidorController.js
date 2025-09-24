@@ -1,6 +1,7 @@
 import { db } from "../config/db.js";
 import { hashPassword, comparePassword } from "../utils/hash.js";
-
+import fetch from "node-fetch";
+import { transporter } from "../config/email.js"; 
 // ---------------- PERFIL ----------------
 export const getProfile = async (req, res) => {
   try {
@@ -135,7 +136,6 @@ export const getHistorialPedidos = async (req, res) => {
   }
 };
 
-
 // ---------------- TRACKING ----------------
 export const savePosition = async (req, res) => {
   try {
@@ -154,33 +154,74 @@ export const savePosition = async (req, res) => {
 
 export const getLastPosition = async (req, res) => {
   try {
+    const { id_envio } = req.params;
+
+    // 🚨 Primero valida que este envío le pertenece al repartidor autenticado
+    const [check] = await db.query(
+      "SELECT id_envio FROM envio WHERE id_envio = ? AND id_repartidor = ?",
+      [id_envio, req.user.id]
+    );
+
+    if (check.length === 0) {
+      return res.status(403).json({ error: "No autorizado" });
+    }
+
+    // ✅ Ahora sí trae la última posición
     const [rows] = await db.query(
       `SELECT latitud, longitud, fecha_hora 
        FROM tracking_envio 
        WHERE id_envio = ? 
        ORDER BY fecha_hora DESC 
        LIMIT 1`,
-      [req.params.id_envio]
+      [id_envio]
     );
+
     if (rows.length === 0) {
-      return res.status(404).json({ error: 'No hay posiciones registradas' });
+      return res.status(404).json({ error: "No hay posiciones registradas" });
     }
+
     res.json(rows[0]);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
 
-
 // ---------------- ESTADO ----------------
 export const marcarRecolectado = async (req, res) => {
   try {
     const { id_envio } = req.params;
+
+    // 1. Actualizar estado
     await db.query(
       "UPDATE envio SET estado = 'Recolectado' WHERE id_envio = ? AND id_repartidor = ?",
       [id_envio, req.user.id]
     );
-    res.json({ msg: "Estado cambiado a Recolectado" });
+
+    // 2. Obtener email del cliente
+    const [rows] = await db.query(
+      `SELECT u.email, u.nombre AS nombre_usuario, p.nombre_destinatario
+       FROM envio e
+       JOIN pedido p ON e.id_pedido = p.id_pedido
+       JOIN usuario u ON p.id_usuario = u.id_usuario
+       WHERE e.id_envio = ?`,
+      [id_envio]
+    );
+
+    if (rows.length) {
+      const cliente = rows[0];
+
+      // 3. Enviar correo con Nodemailer
+      await transporter.sendMail({
+        from: `"FastBox" <fastboxteam@gmail.com>`,
+        to: cliente.email,
+        subject: "Tu pedido ha sido recolectado",
+        html: `<h1>Hola ${cliente.nombre_destinatario}!</h1>
+               <p>Tu pedido esta siendo<strong>recolectado</strong> por nuestro repartidor y pronto estará en camino.</p>`,
+        text: `Hola ${cliente.nombre_destinatario}! Tu pedido esta siendo recolectado por nuestro repartidor y pronto estará en camino.`,
+      });
+    }
+
+    res.json({ msg: "Estado cambiado a Recolectado y correo enviado" });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -189,11 +230,37 @@ export const marcarRecolectado = async (req, res) => {
 export const marcarEntregado = async (req, res) => {
   try {
     const { id_envio } = req.params;
+
+    // 1. Actualizar estado
     await db.query(
       "UPDATE envio SET estado = 'Entregado' WHERE id_envio = ? AND id_repartidor = ?",
       [id_envio, req.user.id]
     );
-    res.json({ msg: "Estado cambiado a Entregado" });
+
+    // 2. Obtener email del destinatario
+    const [rows] = await db.query(
+      `SELECT p.nombre_destinatario, p.email_destinatario
+       FROM envio e
+       JOIN pedido p ON e.id_pedido = p.id_pedido
+       WHERE e.id_envio = ?`,
+      [id_envio]
+    );
+
+    if (rows.length) {
+      const destinatario = rows[0];
+
+      // 3. Enviar correo con Nodemailer
+      await transporter.sendMail({
+        from: `"FastBox" <fastboxteam@gmail.com>`,
+        to: destinatario.email_destinatario,
+        subject: "Tu paquete ha sido entregado",
+        html: `<h1>Hola ${destinatario.nombre_destinatario}!</h1>
+               <p>Tu paquete esta siendo <strong>entregado</strong>. ¡Esperamos que lo disfrutes!</p>`,
+        text: `Hola ${destinatario.nombre_destinatario}! Tu paquete esta siendo entregado. ¡Esperamos que lo disfrutes!`,
+      });
+    }
+
+    res.json({ msg: "Estado cambiado a Entregado y correo enviado" });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

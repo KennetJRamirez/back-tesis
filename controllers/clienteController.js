@@ -14,19 +14,20 @@ export const getPedidoCliente = async (req, res) => {
        JOIN paquete pa ON p.id_paquete = pa.id_paquete
        JOIN direccion d1 ON p.id_direccion_origen = d1.id_direccion
        JOIN direccion d2 ON p.id_direccion_destino = d2.id_direccion
-       WHERE p.id_pedido = ? AND p.id_cliente = ?`,
+       WHERE p.id_pedido = ? AND p.id_usuario = ?`,
       [id_pedido, req.user.id]
     );
 
     if (!rows.length)
-      return res.status(404).json({ error: "Pedido no encontrado o no te pertenece" });
+      return res
+        .status(404)
+        .json({ error: "Pedido no encontrado o no te pertenece" });
 
     res.json(rows[0]);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
-
 // Última ubicación de su pedido
 export const getLastPositionCliente = async (req, res) => {
   try {
@@ -34,13 +35,16 @@ export const getLastPositionCliente = async (req, res) => {
 
     // Validar que el envío pertenezca al cliente
     const [envio] = await db.query(
-      `SELECT e.id_envio FROM envio e
+      `SELECT e.id_envio 
+       FROM envio e
        JOIN pedido p ON e.id_pedido = p.id_pedido
-       WHERE e.id_envio = ? AND p.id_cliente = ?`,
+       WHERE e.id_envio = ? AND p.id_usuario = ?`,
       [id_envio, req.user.id]
     );
     if (!envio.length)
-      return res.status(403).json({ error: "No autorizado para ver este envío" });
+      return res
+        .status(403)
+        .json({ error: "No autorizado para ver este envío" });
 
     // Traer la última posición
     const [rows] = await db.query(
