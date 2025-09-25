@@ -2,6 +2,8 @@ import { db } from "../config/db.js";
 import { hashPassword, comparePassword } from "../utils/hash.js";
 import fetch from "node-fetch";
 import { transporter } from "../config/email.js"; 
+import { generateToken } from "../config/jwt.js";
+import { generateGuestToken } from "../config/jwt.js";
 // ---------------- PERFIL ----------------
 export const getProfile = async (req, res) => {
   try {
@@ -227,17 +229,16 @@ export const marcarRecolectado = async (req, res) => {
   }
 };
 
+/*
 export const marcarEntregado = async (req, res) => {
   try {
     const { id_envio } = req.params;
 
-    // 1. Actualizar estado
     await db.query(
       "UPDATE envio SET estado = 'Entregado' WHERE id_envio = ? AND id_repartidor = ?",
       [id_envio, req.user.id]
     );
 
-    // 2. Obtener email del destinatario
     const [rows] = await db.query(
       `SELECT p.nombre_destinatario, p.email_destinatario
        FROM envio e
@@ -249,19 +250,87 @@ export const marcarEntregado = async (req, res) => {
     if (rows.length) {
       const destinatario = rows[0];
 
-      // 3. Enviar correo con Nodemailer
+      // Crear token guest
+      const guestToken = generateToken(
+        { id_envio, guest: true },
+        "2h"
+      );
+
+      const trackingUrl = `http://localhost:4200/guest-tracking/${guestToken}`;
+
       await transporter.sendMail({
         from: `"FastBox" <fastboxteam@gmail.com>`,
         to: destinatario.email_destinatario,
-        subject: "Tu paquete ha sido entregado",
-        html: `<h1>Hola ${destinatario.nombre_destinatario}!</h1>
-               <p>Tu paquete esta siendo <strong>entregado</strong>. ¡Esperamos que lo disfrutes!</p>`,
-        text: `Hola ${destinatario.nombre_destinatario}! Tu paquete esta siendo entregado. ¡Esperamos que lo disfrutes!`,
+        subject: "¡Tu paquete ha sido entregado!",
+        html: `
+          <h2>Hola ${destinatario.nombre_destinatario} 👋</h2>
+          <p>Tu paquete ha sido entregado. 
+          Puedes ver el recorrido en este enlace (válido por 2 horas):</p>
+          <a href="${trackingUrl}" style="background:#2563eb;color:white;padding:10px 15px;text-decoration:none;border-radius:5px;">
+             Ver tracking
+          </a>
+        `,
+        text: `Hola ${destinatario.nombre_destinatario}, tu paquete ha sido entregado. Mira el recorrido aquí: ${trackingUrl}`,
       });
     }
 
-    res.json({ msg: "Estado cambiado a Entregado y correo enviado" });
+    res.json({ msg: "Estado cambiado a Entregado y correo enviado con link de tracking" });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ error: err.message });
   }
 };
+*/
+
+export const marcarEntregado = async (req, res) => {
+  try {
+    const { id_envio } = req.params;
+
+    // 1. Actualizar estado
+    await db.query(
+      "UPDATE envio SET estado = 'En tránsito' WHERE id_envio = ? AND id_repartidor = ?",
+      [id_envio, req.user.id]
+    );
+
+    // 2. Obtener datos del destinatario
+    const [rows] = await db.query(
+      `SELECT p.nombre_destinatario, p.email_destinatario
+       FROM envio e
+       JOIN pedido p ON e.id_pedido = p.id_pedido
+       WHERE e.id_envio = ?`,
+      [id_envio]
+    );
+
+    if (rows.length) {
+      const destinatario = rows[0];
+
+      // 3. Crear token guest válido por 24h
+      const guestToken = generateGuestToken(id_envio);
+
+      const trackingUrl = `http://localhost:4200/guest-tracking/${guestToken}`;
+
+      // 4. Enviar correo con link de tracking
+      await transporter.sendMail({
+        from: `"FastBox" <fastboxteam@gmail.com>`,
+        to: destinatario.email_destinatario,
+        subject: "¡Tu paquete está en camino!",
+        html: `
+          <h2>Hola ${destinatario.nombre_destinatario} 👋</h2>
+          <p>Tu paquete está en camino. Puedes seguir la ubicación en tiempo real aquí:</p>
+          <a href="${trackingUrl}" style="background:#16a34a;color:white;padding:10px 15px;text-decoration:none;border-radius:5px;">
+             Seguir mi paquete
+          </a>
+        `,
+        text: `Hola ${destinatario.nombre_destinatario}, tu paquete está en camino. Sigue el tracking aquí: ${trackingUrl}`,
+      });
+    }
+
+    res.json({ msg: "Estado cambiado a 'En tránsito' y correo enviado con link de tracking" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
+};
+
+
+

@@ -1,6 +1,6 @@
 import { db } from "../config/db.js";
 
-// Detalles de un pedido del cliente
+// Pedido del cliente normal
 export const getPedidoCliente = async (req, res) => {
   try {
     const { id_pedido } = req.params;
@@ -19,21 +19,19 @@ export const getPedidoCliente = async (req, res) => {
     );
 
     if (!rows.length)
-      return res
-        .status(404)
-        .json({ error: "Pedido no encontrado o no te pertenece" });
+      return res.status(404).json({ error: "Pedido no encontrado o no te pertenece" });
 
     res.json(rows[0]);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
-// Última ubicación de su pedido
+
+// Última posición cliente normal
 export const getLastPositionCliente = async (req, res) => {
   try {
     const { id_envio } = req.params;
 
-    // Validar que el envío pertenezca al cliente
     const [envio] = await db.query(
       `SELECT e.id_envio 
        FROM envio e
@@ -41,12 +39,30 @@ export const getLastPositionCliente = async (req, res) => {
        WHERE e.id_envio = ? AND p.id_usuario = ?`,
       [id_envio, req.user.id]
     );
-    if (!envio.length)
-      return res
-        .status(403)
-        .json({ error: "No autorizado para ver este envío" });
 
-    // Traer la última posición
+    if (!envio.length)
+      return res.status(403).json({ error: "No autorizado para ver este envío" });
+
+    const [rows] = await db.query(
+      `SELECT latitud, longitud, fecha_hora
+       FROM tracking_envio
+       WHERE id_envio = ?
+       ORDER BY fecha_hora DESC
+       LIMIT 1`,
+      [id_envio]
+    );
+
+    res.json(rows[0] || null);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// Última posición guest
+export const getLastPositionGuest = async (req, res) => {
+  try {
+    const { id_envio } = req.guest;
+
     const [rows] = await db.query(
       `SELECT latitud, longitud, fecha_hora
        FROM tracking_envio
