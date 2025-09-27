@@ -158,7 +158,7 @@ export const getLastPosition = async (req, res) => {
   try {
     const { id_envio } = req.params;
 
-    // 🚨 Primero valida que este envío le pertenece al repartidor autenticado
+    // Primero valida que este envío le pertenece al repartidor autenticado
     const [check] = await db.query(
       "SELECT id_envio FROM envio WHERE id_envio = ? AND id_repartidor = ?",
       [id_envio, req.user.id]
@@ -168,7 +168,7 @@ export const getLastPosition = async (req, res) => {
       return res.status(403).json({ error: "No autorizado" });
     }
 
-    // ✅ Ahora sí trae la última posición
+    // Ahora sí trae la última posición
     const [rows] = await db.query(
       `SELECT latitud, longitud, fecha_hora 
        FROM tracking_envio 
@@ -288,7 +288,7 @@ export const marcarEntregado = async (req, res) => {
 
     // 1. Actualizar estado
     await db.query(
-      "UPDATE envio SET estado = 'En tránsito' WHERE id_envio = ? AND id_repartidor = ?",
+      "UPDATE envio SET estado = 'Entregado' WHERE id_envio = ? AND id_repartidor = ?",
       [id_envio, req.user.id]
     );
 
@@ -325,7 +325,7 @@ export const marcarEntregado = async (req, res) => {
       });
     }
 
-    res.json({ msg: "Estado cambiado a 'En tránsito' y correo enviado con link de tracking" });
+    res.json({ msg: "Estado cambiado a 'Entregado' y correo enviado con link de tracking" });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: err.message });
