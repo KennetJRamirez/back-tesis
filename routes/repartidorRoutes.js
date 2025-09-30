@@ -10,6 +10,8 @@ import {
   getLastPosition,
   marcarRecolectado,
   marcarEntregado,
+  iniciarEntrega,
+  iniciarRecoleccion
 } from "../controllers/repartidorController.js";
 
 const router = express.Router();
@@ -31,9 +33,10 @@ router.post("/tracking/:id_envio", savePosition);
 router.get("/tracking/:id_envio", getLastPosition);
 
 // ESTADO PEDIDOS
-router.put("/pedidos/:id_envio/recolectado", marcarRecolectado);
-router.put("/pedidos/:id_envio/entregado", marcarEntregado);
-
 router.get('/tracking/:id_envio/last', authMiddleware, getLastPosition);
+router.put("/pedidos/:id_envio/iniciar-recoleccion", iniciarRecoleccion);
+router.put("/pedidos/:id_envio/recolectado", marcarRecolectado);
+router.put("/pedidos/:id_envio/iniciar-entrega", iniciarEntrega);
+router.put("/pedidos/:id_envio/entregado", marcarEntregado);
 
 export default router;
