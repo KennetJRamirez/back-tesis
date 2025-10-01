@@ -6,7 +6,6 @@ dotenv.config();
 
 const MAPBOX_TOKEN = process.env.MAPBOX_TOKEN;
 
-// Normaliza strings para comparación
 function normalizeString(str) {
   return str
     .normalize("NFD")
@@ -15,7 +14,6 @@ function normalizeString(str) {
     .toLowerCase();
 }
 
-// Convierte "Zona 1" a número 1
 function parseZona(zona) {
   if (typeof zona === "string") {
     const match = zona.match(/\d+/);
@@ -50,7 +48,35 @@ async function calcularKm(origen, destino) {
   return data.routes[0].distance / 1000; // km
 }
 
-// Crea pedido
+// 🔹 Solo calcula costo, no guarda nada
+export const calcularCostoPedido = async (req, res) => {
+  try {
+    const { paquete, direccion_origen, direccion_destino } = req.body;
+
+    const km_destino = await calcularKm(direccion_origen, direccion_destino);
+    const zonaNum = parseZona(direccion_destino.zona);
+
+    const costo = calcularTarifa({
+      zona: zonaNum,
+      municipio: direccion_destino.municipio,
+      km: km_destino,
+    });
+
+    if (!costo)
+      return res.status(400).json({
+        error: "No se encontró tarifa para la ruta indicada.",
+      });
+
+    res.json({
+      km_destino: Number(km_destino.toFixed(1)),
+      costo: Number(costo.toFixed(2)),
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// 🔹 Crear pedido real
 export const createPedido = async (req, res) => {
   try {
     const { paquete, direccion_origen, direccion_destino, destinatario } =
@@ -68,27 +94,22 @@ export const createPedido = async (req, res) => {
     );
     const id_paquete = paqueteResult.insertId;
 
-    // Insertar dirección origen
+    // Insertar direcciones
     const [origenResult] = await db.query(
       "INSERT INTO direccion (calle_principal, numero, calle_secundaria, zona, colonia_o_barrio, municipio, departamento, codigo_postal, referencias) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
       Object.values(direccion_origen)
     );
     const id_direccion_origen = origenResult.insertId;
 
-    // Insertar dirección destino
     const [destinoResult] = await db.query(
       "INSERT INTO direccion (calle_principal, numero, calle_secundaria, zona, colonia_o_barrio, municipio, departamento, codigo_postal, referencias) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
       Object.values(direccion_destino)
     );
     const id_direccion_destino = destinoResult.insertId;
 
-    // Calcular distancia
+    // Calcular distancia y costo
     const km_destino = await calcularKm(direccion_origen, direccion_destino);
-
-    // Parsear zona destino correctamente
     const zonaNum = parseZona(direccion_destino.zona);
-
-    // Calcular costo
     const costo = calcularTarifa({
       zona: zonaNum,
       municipio: direccion_destino.municipio,
@@ -100,7 +121,7 @@ export const createPedido = async (req, res) => {
         error: "No se encontró tarifa para la ruta indicada.",
       });
 
-    // Verificar repartidor disponible en la zona
+    // Repartidor disponible
     const [repartidores] = await db.query(
       `SELECT rz.id_repartidor, COUNT(e.id_envio) AS carga
        FROM repartidor_zona rz
@@ -138,28 +159,25 @@ export const createPedido = async (req, res) => {
     );
     const id_pedido = pedidoResult.insertId;
 
-    // Insertar envío con repartidor asignado
+    // Insertar envío
     await db.query(
       "INSERT INTO envio (id_pedido, id_repartidor, costo, estado) VALUES (?, ?, ?, 'En tránsito')",
       [id_pedido, id_repartidor, costo]
     );
 
-    // Redondeos
-    const kmRedondeado = Number(km_destino.toFixed(1));
-    const costoRedondeado = Number(costo.toFixed(2));
-
     res.json({
       msg: "Pedido creado",
       id_pedido,
       id_repartidor,
-      costo: costoRedondeado,
-      km_destino: kmRedondeado,
+      costo: Number(costo.toFixed(2)),
+      km_destino: Number(km_destino.toFixed(1)),
     });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
-// Ver todos los pedidos del usuario logueado
+
+// Ver pedidos del usuario
 export const getMisPedidos = async (req, res) => {
   try {
     const [rows] = await db.query(
@@ -186,4 +204,3 @@ export const getMisPedidos = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
-
