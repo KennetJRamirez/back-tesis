@@ -1,0 +1,6 @@
+node_modules/
+.env
+backend.zip
+backup_fastbox.sql
+backupcito.sql
+__tests__/

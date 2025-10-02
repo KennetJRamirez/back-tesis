@@ -15,6 +15,9 @@ export const register = async (req, res) => {
 
 		res.json({ id: result.insertId, nombre, telefono, email, id_rol });
 	} catch (err) {
+		if (err.code === 'ER_DUP_ENTRY') {
+			return res.status(409).json({ error: "Usuario ya existe" });
+		}
 		res.status(500).json({ error: err.message });
 	}
 };
