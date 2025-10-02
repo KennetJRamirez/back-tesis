@@ -10,8 +10,15 @@ import {
   getPedidosPorEstado,
   getIngresosPorDia,
   getPedidosPorZona,
-  getEntregasPorRepartidor
+  getEntregasPorRepartidor,
 } from "../controllers/adminController.js";
+
+import {
+  validateGetUserById,
+  validateUpdateUser,
+  validateChangeUserRole,
+  validateChangeUserStatus,
+} from "../middlewares/adminValidator.js";
 
 const router = Router();
 
@@ -20,10 +27,10 @@ router.use(authMiddleware, authorizeRoles(3));
 
 // ---- Usuarios ----
 router.get("/usuarios", getAllUsers);
-router.get("/usuarios/:id", getUserById);
-router.put("/usuarios/:id", updateUser);
-router.put("/usuarios/:id/rol", changeUserRole);
-router.put("/usuarios/:id/estado", changeUserStatus);
+router.get("/usuarios/:id", validateGetUserById, getUserById);
+router.put("/usuarios/:id", validateUpdateUser, updateUser);
+router.put("/usuarios/:id/rol", validateChangeUserRole, changeUserRole);
+router.put("/usuarios/:id/estado", validateChangeUserStatus, changeUserStatus);
 
 // ---- Reportes ----
 router.get("/reportes/pedidos-estado", getPedidosPorEstado);

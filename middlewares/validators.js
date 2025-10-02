@@ -5,8 +5,8 @@ export const validateRegister = [
   body("nombre").notEmpty().withMessage("El nombre es obligatorio"),
   body("telefono")
     .optional()
-    .isMobilePhone("es-GT")
-    .withMessage("Teléfono inválido (Guatemala)"),
+    .isMobilePhone("any")
+    .withMessage("Teléfono inválido"),
   body("email").isEmail().withMessage("Email inválido"),
   body("password")
     .isLength({ min: 8 })
