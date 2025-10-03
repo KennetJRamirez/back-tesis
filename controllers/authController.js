@@ -46,7 +46,6 @@ export const login = async (req, res) => {
 
 export const logout = (req, res) => {
     try {
-        // Limpiar cookies en el navegador
         res.clearCookie("token", { path: "/", sameSite: "None", secure: true });
         res.clearCookie("rol", { path: "/", sameSite: "None", secure: true });
 

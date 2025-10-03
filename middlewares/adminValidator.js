@@ -38,3 +38,16 @@ export const validateChangeUserStatus = [
   body("activo").isBoolean().withMessage("El estado debe ser true/false"),
   handleErrors,
 ];
+
+// RepartidorID
+export const validateRepartidorId = [
+  param("id").isInt({ min: 1 }).withMessage("ID de repartidor inválido"),
+  handleErrors,
+];
+
+// RepartidorZona
+export const validateZonaBody = [
+  body("municipio").notEmpty().withMessage("Municipio obligatorio"),
+  body("zona").isInt({ min: 1 }).withMessage("Zona inválida"),
+  handleErrors,
+];

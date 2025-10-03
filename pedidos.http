@@ -1,8 +1,11 @@
+GET http://localhost:3000/pedido/104
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Nywicm9sIjoxLCJpYXQiOjE3NTkzODQ0MTMsImV4cCI6MTc1OTM4ODAxM30.qmcT5zcq-aoQQeJ0KET7NhHozc4HAg3ALTZZq_vsExQ
 
 
 
 
-
+###
 POST http://localhost:3000/pedido
 Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Mywicm9sIjoxLCJpYXQiOjE3NTc1NzU4MTEsImV4cCI6MTc1NzU3OTQxMX0.CMMg0ZQyLuyor3BbJktGjlqoL23N1T51Kpy-2SFfBJM

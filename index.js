@@ -6,6 +6,7 @@ import adminRoutes from "./routes/adminRoutes.js";
 import pedidoRoutes from "./routes/pedidoRoutes.js";
 import repartidorRoutes from "./routes/repartidorRoutes.js";
 import clienteRoutes from "./routes/clienteRoutes.js";
+import "./jobs/cleanTracking.js";
 
 const app = express();
 
@@ -40,7 +41,7 @@ app.use("/pedido", pedidoRoutes);
 app.use("/repartidor", repartidorRoutes);
 app.use("/cliente", clienteRoutes);
 
-// Catch-all global para 404 (después de todas las rutas)
+// Catch-all global para 404
 app.use((req, res) => {
   res.status(404).json({ error: "Not Found" });
 });

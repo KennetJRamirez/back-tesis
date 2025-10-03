@@ -132,3 +132,66 @@ export const getEntregasPorRepartidor = async (req, res) => {
     res.status(500).json({ error: "Error al obtener entregas por repartidor" });
   }
 };
+
+
+
+// Repa
+// Listar zonas de un repartidor
+export const getRepartidorZonas = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const [rows] = await db.query(
+      "SELECT * FROM repartidor_zona WHERE id_repartidor = ?",
+      [id]
+    );
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// Asignar zona
+export const assignZona = async (req, res) => {
+  try {
+    const { id } = req.params; // id del repartidor
+    const { municipio, zona } = req.body;
+
+    // Validar si ya existe
+    const [exists] = await db.query(
+      "SELECT * FROM repartidor_zona WHERE id_repartidor = ? AND municipio = ? AND zona = ?",
+      [id, municipio, zona]
+    );
+
+    if (exists.length > 0)
+      return res.status(400).json({ error: "Zona ya asignada a este repartidor" });
+
+    await db.query(
+      "INSERT INTO repartidor_zona (id_repartidor, municipio, zona) VALUES (?, ?, ?)",
+      [id, municipio, zona]
+    );
+    res.json({ msg: "Zona asignada correctamente" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// Quitar zona
+export const removeZona = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { municipio, zona } = req.body;
+
+    const [result] = await db.query(
+      "DELETE FROM repartidor_zona WHERE id_repartidor = ? AND municipio = ? AND zona = ?",
+      [id, municipio, zona]
+    );
+
+    if (result.affectedRows === 0)
+      return res.status(404).json({ error: "No se encontró la zona para este repartidor" });
+
+    res.json({ msg: "Zona eliminada correctamente" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+

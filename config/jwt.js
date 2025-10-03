@@ -1,6 +1,9 @@
 import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
 
-const SECRET = "supersecretoxd"; // en prod -> process.env.JWT_SECRET
+dotenv.config();
+
+const SECRET = process.env.JWT_SECRET;
 
 // Token normal (usuario logueado)
 export const generateToken = (usuario) => {
@@ -22,7 +25,7 @@ export const generateGuestToken = (id_envio) => {
       id_envio,
     },
     SECRET,
-    { expiresIn: "1h" }
+    { expiresIn: "30h" }
   );
 };
 
