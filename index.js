@@ -12,34 +12,22 @@ const app = express();
 
 app.disable("x-powered-by");
 
-const allowedOrigins = [
-  "http://localhost:4200",
-  "http://127.0.0.1:4200",
-  "https://localhost:4200",
-  "https://127.0.0.1:4200",
-];
-
 app.use(
   cors({
-    origin: function (origin, callback) {
-      console.log("CORS origin recibido:", origin);
-      if (!origin) return callback(null, true);
-      if (allowedOrigins.includes(origin)) return callback(null, true);
-      return callback(new Error("No permitido por CORS"));
-    },
-    credentials: true,
+    origin: true,      
+    credentials: true,   
   })
 );
 
 app.use(express.json());
 
 // Rutas
-app.use("/auth", authRoutes);
-app.use("/usuario", usuarioRoutes);
-app.use("/admin", adminRoutes);
-app.use("/pedido", pedidoRoutes);
-app.use("/repartidor", repartidorRoutes);
-app.use("/cliente", clienteRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/usuario", usuarioRoutes);
+app.use("/api/admin", adminRoutes);
+app.use("/api/pedido", pedidoRoutes);
+app.use("/api/repartidor", repartidorRoutes);
+app.use("/api/cliente", clienteRoutes);
 
 // Catch-all global para 404
 app.use((req, res) => {
